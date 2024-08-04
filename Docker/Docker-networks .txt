@@ -1,0 +1,12 @@
+docker run -it -d --network=bridge <image>
+
+docker run -it -d --network=host <image>
+
+docker run -it -d --network=none <image>
+
+docker network create -d overlay <network_name>
+
+docker run -it -d --network=<network_name> <image>
+
+docker network create --driver bridge <network_name>
+docker run -it -d --network=<network_name> <image>

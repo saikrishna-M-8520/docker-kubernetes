@@ -1,0 +1,25 @@
+docker swarm
+# On the manager node
+docker swarm init --advertise-addr <MANAGER-IP>
+
+docker service create --name my-nginx --replicas 3 -p 80:80 nginx
+
+docker service ls
+
+docker service ps my-nginx
+
+docker service scale my-nginx=5
+
+
+To schedule on slave node
+
+docker node ls
+
+docker node update --label-add role=worker <NODE-ID>
+
+docker service create \
+  --name my-nginx \
+  --replicas 3 \
+  --publish 8080:80 \
+  --constraint 'node.labels.role == worker' \
+  nginx
