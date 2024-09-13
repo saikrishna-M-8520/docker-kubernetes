@@ -1,0 +1,47 @@
+version: '3.8'  # Specify Docker Compose version
+
+services:
+  web:
+    image: nginx:latest  # Web service using Nginx
+    container_name: web_service
+    ports:
+      - "80:80"  # Map host port 80 to container port 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Optional: use custom Nginx config (if needed)
+    depends_on:
+      - app  # Ensure the app service starts before the web service
+    networks:
+      - app_network
+
+  app:
+    build:
+      context: ./app  # Context for building the app image (Dockerfile inside app folder)
+    container_name: app_service
+    ports:
+      - "5000:5000"  # Map host port 5000 to container port 5000 for Flask
+    environment:
+      - DATABASE_URL=mysql://db_user:db_password@db/db_name  # Environment variable for DB connection
+    depends_on:
+      - db  # Ensure the DB service starts before the app service
+    networks:
+      - app_network
+
+  db:
+    image: mysql:8.0  # MySQL database service
+    container_name: db_service
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: db_name
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: db_password
+    volumes:
+      - db_data:/var/lib/mysql  # Persist database data
+    networks:
+      - app_network
+
+volumes:
+  db_data:  # Named volume for persisting database data
+
+networks:
+  app_network:  # Custom bridge network for inter-service communication
+    driver: bridge
