@@ -1,0 +1,41 @@
+/var/lib/jenkins/.kube
+
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = '/var/lib/jenkins/.kube/config' // Adjust this path as per where you save the kubeconfig
+    }
+
+    stages {
+        stage('Deploy Job on Kubernetes') {
+            steps {
+                script {
+                    // Define the Kubernetes job manifest as a YAML string
+                    def kubernetesJob = """
+                    apiVersion: batch/v1
+                    kind: Job
+                    metadata:
+                      name: jenkins-job-example
+                      namespace: jenkins
+                    spec:
+                      template:
+                        spec:
+                          containers:
+                          - name: example-container
+                            image: busybox
+                            command: ['sh', '-c', 'echo Hello, Kubernetes! && sleep 30']
+                          restartPolicy: Never
+                      backoffLimit: 4
+                    """
+
+                    // Write the job definition to a file
+                    writeFile file: 'kubernetes-job.yaml', text: kubernetesJob
+                    
+                    // Apply the job to the Kubernetes cluster
+                    sh 'kubectl apply -f kubernetes-job.yaml'
+                }
+            }
+        }
+    }
+}
